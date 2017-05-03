@@ -740,7 +740,7 @@ class TestSnapAdmin(unittest.TestCase):
         js=SnapAdmin()
         js.args.file = os.path.join(os.path.dirname(__file__), 'configs', 'main.yml')
         js.snapcheck(js.args.file)      #if filename not given func()  sets it to snap_temp
-        mock_extract_data.assert_called_with(js.args.file, 'snap_temp', "snapcheck")
+        mock_extract_data.assert_called_with(js.args.file, 'snap_temp', 'snapcheck', local=False)
 
     @patch('ncclient.manager.connect')
     @patch('jnpr.jsnapy.jsnapy.SnapAdmin.extract_dev_data')
