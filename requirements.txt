@@ -2,5 +2,5 @@ junos-eznc
 colorama
 configparser
 pyparsing
-icdiff
+-e git://github.com/sidhujasminder/icdiff.git@fixing-byte-encoding#egg=icdiff
 future

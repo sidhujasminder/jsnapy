@@ -326,6 +326,12 @@ class SnapAdmin:
                 fpath = get_path('DEFAULT', 'config_file_path')
                 config_file = open(os.path.join(fpath, conf_file), 'r')
                 self.main_file = yaml.load(config_file)
+            else:
+                self.logger.error(
+                    colorama.Fore.RED +
+                    "ERROR!! Config file '%s' is not present " %
+                    conf_file, extra=self.log_detail)
+                sys.exit(1)
         else:
             if self.args.hostname and self.args.testfiles:
                 temp_dict = {'hosts':[{'device':'', 'username':'', 'passwd':''}], 'tests':[]}
