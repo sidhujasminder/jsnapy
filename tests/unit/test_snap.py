@@ -68,7 +68,7 @@ class TestSnap(unittest.TestCase):
             passwd="xyz")
         dev.open()
         m_op = mock_open()
-        with patch('jnpr.jsnapy.snap.open', m_op, create=True) as (m_open):
+        with (patch('jnpr.jsnapy.snap.open', m_op, create=True))as (m_open):
             mock_path.return_value = os.path.join(os.path.dirname(__file__), 'configs')
             js.generate_rpc_reply(
                 dev,
@@ -186,7 +186,10 @@ class TestSnap(unittest.TestCase):
             host="10.216.193.114",
             user="xyz",
             passwd="abc")
-        with patch('jnpr.junos.rpcmeta._RpcMetaExec.__getattr__') as (mock_rpc):
+        with (
+                patch('jnpr.junos.rpcmeta._RpcMetaExec.__getattr__')
+
+        ) as (mock_rpc):
             prs.generate_reply(
                 test_file,
                 dev,
@@ -225,6 +228,7 @@ class TestSnap(unittest.TestCase):
                 c[0][0].find("ERROR!!, filtering rpc works only for 'get-config' rpc"), -1)
         dev.close()
 
+
     @patch('jnpr.junos.rpcmeta._RpcMetaExec.get_config')
     @patch('jnpr.jsnapy.snap.Parser._write_file')
     @patch('jnpr.jsnapy.snap.etree')
@@ -238,7 +242,10 @@ class TestSnap(unittest.TestCase):
             host="10.216.193.114",
             user="xyz",
             passwd="abc")
-        with patch('jnpr.junos.rpcmeta._RpcMetaExec.__getattr__') as (mock_rpc):
+        with (
+                patch('jnpr.junos.rpcmeta._RpcMetaExec.__getattr__')
+
+        ) as (mock_rpc):
             prs.generate_reply(
                 test_file,
                 dev,
@@ -432,11 +439,11 @@ class TestSnap(unittest.TestCase):
             mock_insert.assert_has_calls(calls)
         dev.close()
 
-#with nested(
-#        patch('jnpr.jsnapy.snap.logging.getLogger'),
-#        patch('logging.Logger'),
-#        patch('jnpr.jsnapy.snap.logging.getLogger')
-#)as (mock_logger, mock_log, mock_log1):
-#    if __name__ == "__main__":
-#        suite = unittest.TestLoader().loadTestsFromTestCase(TestSnap)
-#        unittest.TextTestRunner(verbosity=2).run(suite)
+# with nested(
+#         patch('jnpr.jsnapy.snap.logging.getLogger'),
+#         patch('logging.Logger'),
+#         patch('jnpr.jsnapy.snap.logging.getLogger')
+# )as (mock_logger, mock_log, mock_log1):
+#     if __name__ == "__main__":
+#         suite = unittest.TestLoader().loadTestsFromTestCase(TestSnap)
+#         unittest.TextTestRunner(verbosity=2).run(suite)
