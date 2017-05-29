@@ -341,12 +341,7 @@ class SnapAdmin:
                 for tfile in self.args.testfiles:
                     temp_dict['tests'].append(tfile)
                 self.main_file = temp_dict
-            else:
-                self.logger.error(
-                    colorama.Fore.RED +
-                    "ERROR!! Config file '%s' is not present " %
-                    conf_file, extra=self.log_detail)
-                sys.exit(1)
+
 
         #### if --check option is given for sqlite, then snap file name is not compulsory  ####
         #### else exit the function saying arguments not correct  ####
