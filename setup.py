@@ -12,6 +12,8 @@ from os.path import expanduser
 from setuptools import setup, find_packages
 from setuptools.command.install import install
 import configparser
+import uuid
+from pip.req import parse_requirements
 
 
 class OverrideInstall(install):
@@ -98,9 +100,11 @@ class OverrideInstall(install):
             if flag is False:
                 raise Exception('jsnapy.cfg not found at possible location')
 
-req_lines = [line.strip() for line in open(
-    'requirements.txt').readlines()]
-install_reqs = list(filter(None, req_lines))
+#req_lines = [line.strip() for line in open(
+ #   'requirements.txt').readlines()]
+#install_reqs = list(filter(None, req_lines))
+install_reqs = parse_requirements('requirements.txt', session=uuid.uuid1())
+reqs = [str(ir.req) for ir in install_reqs]
 example_files = [
     os.path.join(
         'samples',
