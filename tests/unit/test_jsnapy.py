@@ -483,20 +483,6 @@ class TestSnapAdmin(unittest.TestCase):
             config_data = yaml.load(config_file)
             js.connect('10.216.193.114', 'abc', None, 'snap_1', config_data)
 
-    # @patch('getpass.getpass')					#new
-    # def test_check_arguments_12(self, mock_pass):#, mock_open):  # if we give password then we are consodering that it is going to raise connectautherror.
-    #         #mock_open.side_effect = Exception(ConnectAuthError)
-    #     mock_pass.return_value = 'MaRtInI'
-    #     js = SnapAdmin()
-    #     js.args.snap = True
-    #     js.args.snapcheck = True
-    #     js.args.local = False
-    #     js.args.file = os.path.join(os.path.dirname(__file__),
-    #                                  'configs', 'main_1.yml')
-    #     config_file = open(js.args.file, 'r')
-    #     config_data = yaml.load(config_file)
-    #     js.connect('10.221.136.250', 'regress', None, 'snap_1', config_data)
-    #     mock_pass.assert_called()
 
     @patch('os.path.isfile')             		#new
     def test_multiple_devices_1(self, mock_isfile):
