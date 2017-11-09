@@ -36,6 +36,10 @@ def set_logging_path(path):
                         value['filename'] = (os.path.join
                                              (os.path.expanduser('~'),
                                               'logs\jsnapy\jsnapy.log'))
+                    else:
+                        value['filename'] = (os.path.join
+                                             (os.path.expanduser('~'),
+                                              'jsnapy', 'logs', 'jsnapy.log'))
 
                 with open(path, "w") as f:
                     yaml.dump(config, f, default_flow_style=False)
@@ -63,29 +67,42 @@ class OverrideInstall(install):
                 self.install_data = '/etc/jsnapy'
 
         dir_path = self.install_data
-        mode = 0o777
+        dir_mode = 0o755
+        file_mode = 0o644
         install.run(self)
 
         if 'win32' not in sys.platform and not hasattr(sys, 'real_prefix'):
-            os.chmod(dir_path, mode)
+            os.chmod(dir_path, dir_mode)
             for root, dirs, files in os.walk(dir_path):
                 for directory in dirs:
-                    os.chmod(os.path.join(root, directory), mode)
+                    os.chmod(os.path.join(root, directory), dir_mode)
                 for fname in files:
-                    os.chmod(os.path.join(root, fname), mode)
+                    os.chmod(os.path.join(root, fname), file_mode)
 
-            os.chmod('/var/log/jsnapy', mode)
-            for root, dirs, files in os.walk('/var/log/jsnapy'):
+            dir_mode = 0o775
+            file_mode = 0o664
+
+            HOME = expanduser("~")  # correct cross platform way to do it
+            home_folder = os.path.join(HOME, 'jsnapy')
+            os.chmod(home_folder, dir_mode)
+            for root, dirs, files in os.walk(home_folder):
                 for directory in dirs:
-                    os.chmod(os.path.join(root, directory), mode)
+                    os.chmod(os.path.join(root, directory), dir_mode)
+
+            path = '/etc/jsnapy/logging.yml'
+            set_logging_path(path)
+            home_folder_log = os.path.join(HOME, 'jsnapy', 'logs')
+            os.chmod(home_folder_log, dir_mode)
+            for root, dirs, files in os.walk(home_folder):
                 for fname in files:
-                    os.chmod(os.path.join(root, fname), mode)
+                    os.chmod(os.path.join(root, fname), file_mode)
 
         HOME = expanduser("~")  # correct cross platform way to do it
         home_folder = os.path.join(HOME, '.jsnapy')
+        user_mode = 0o777
         if not os.path.isdir(home_folder):
             os.mkdir(home_folder)
-            os.chmod(home_folder, mode)
+            os.chmod(home_folder, user_mode)
 
         if dir_path != '/etc/jsnapy':
             config = ConfigParser()
@@ -172,12 +189,14 @@ elif 'win32' in sys.platform:
                     ]
 
 else:
+    HOME = expanduser("~")  # correct cross platform way to do it
+    home_folder = os.path.join(HOME, 'jsnapy')
     os_data_file = [('/etc/jsnapy', ['lib/jnpr/jsnapy/logging.yml']),
-                    ('samples', example_files),
+                    (os.path.join(home_folder,'samples'), example_files),
                     ('/etc/jsnapy', ['lib/jnpr/jsnapy/jsnapy.cfg']),
-                    ('testfiles', ['testfiles/README']),
-                    ('snapshots', ['snapshots/README']),
-                    ('/var/log/jsnapy', log_files)
+                    (os.path.join(home_folder,'testfiles'), ['testfiles/README']),
+                    (os.path.join(home_folder,'snapshots'), ['snapshots/README']),
+                    (os.path.join(home_folder,'logs'), log_files)
                     ]
 
 setup(name="jsnapy",
