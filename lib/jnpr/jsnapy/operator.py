@@ -2374,6 +2374,182 @@ class Operator:
         tresult['count'] = {'pass': count_pass, 'fail': count_fail}
         self.test_details[teston].append(tresult)
 
+    def diff(self, x_path, ele_list, err_mssg,
+                info_mssg, teston, iter, id_list, test_name, xml1, xml2, ignore_null=None):
+        self.print_testmssg("diff")
+        res = True
+        iddict = {}
+        predict = {}
+        postdict = {}
+        tresult = {
+            'xpath': x_path,
+            'testoperation': "diff",
+            'node_name': ele_list[0],
+            'failed': [],
+            'passed': [],
+            'test_name': test_name
+            # 'pre_xml': xml1,
+            # 'post_xml': xml2
+        }
+        count_pass = 0
+        count_fail = 0
+        id_val = {}
+
+        pre_nodes, post_nodes = self._find_xpath(iter, x_path, xml1, xml2)
+        if re.match(ele_list[0], "no node"):
+            self.logger_testop.error(colorama.Fore.RED +
+                                     "ERROR!! 'diff' operator requires node value to test !!", extra=self.log_detail)
+        else:
+            if (not pre_nodes) or (not post_nodes):
+
+                if self._is_ignore_null(ignore_null):
+                    self.logger_testop.debug(colorama.Fore.YELLOW +
+                                             "SKIPPING!! Nodes are not present in given Xpath: <{}>".format(
+                                                 x_path),
+                                             extra=self.log_detail)
+                    res = None
+                else:
+                    self.logger_testop.error(colorama.Fore.RED +
+                                             "ERROR!! Nodes are not present in given Xpath: <{}>".format(
+                                                 x_path),
+                                             extra=self.log_detail)
+                    res = False
+                    count_fail = count_fail + 1
+                    node_value_failed = {
+                        'id': iddict,
+                        'pre': predict,
+                        'post': postdict,
+                        'actual_node_value': None,
+                        'xpath_error': True}
+                    tresult['failed'].append(deepcopy(node_value_failed))
+
+            else:
+                # assuming one iterator has unique set of ids, i.e only one node matching to id
+                # making dictionary for id and its corresponding xpath
+                # one xpath has only one set of id
+                data1 = self._get_data(id_list, pre_nodes, ignore_null)
+                data2 = self._get_data(id_list, post_nodes, ignore_null)
+                # making union of id keys
+                data1_key = set(data1.keys())
+                data2_key = set(data2.keys())
+                keys_union = data1_key.union(data2_key)
+
+                if not keys_union:
+                    self.logger_testop.debug(colorama.Fore.YELLOW +
+                                             "SKIPPING!! Nodes are not present for given IDs: {}".format(
+                                                 id_list),
+                                             extra=self.log_detail)
+                    res = None
+                # iterating through ids which are present either in pre
+                # snapshot or post snapshot or both
+                for k in keys_union:
+                    for length in range(len(k)):
+                        # making dictionary of ids for given xpath, ex id_0,
+                        # id_1 ..etc
+                        iddict[
+                            'id_' + str(length)] = [k[length][i].strip() for i in range(len(k[length]))]
+                    if k in data1 and k in data2:
+                        # mapping id name to its value
+                        for length in range(len(k)):
+                            id_val[id_list[length]] = k[length][0].strip()
+
+                        predict, postdict = self._get_nodevalue(
+                            predict, postdict, data1[k], data2[k], x_path, ele_list[0], err_mssg)
+                        predict, postdict = self._get_nodevalue(
+                            predict, postdict, data1[k], data2[k], x_path, ele_list[0], info_mssg)
+
+                        ele_xpath1 = data1.get(k).xpath(ele_list[0])
+                        ele_xpath2 = data2.get(k).xpath(ele_list[0])
+                        val_list1 = [element.text.strip() for element in ele_xpath1] if len(
+                            ele_xpath1) != 0 else None
+                        val_list2 = [element.text.strip() for element in ele_xpath2] if len(
+                            ele_xpath2) != 0 else None
+
+                        predict[ele_list[0]] = val_list1
+                        postdict[ele_list[0]] = val_list2
+
+                        if val_list1 == val_list2:
+                            res = False
+                            count_fail = count_fail + 1
+                            message = self._print_message(
+                                err_mssg,
+                                iddict,
+                                predict,
+                                postdict,
+                                "info")
+                            node_value_failed = {
+                                'id': id_val,
+                                'pre': predict,
+                                'post': postdict,
+                                'pre_node_value': val_list1,
+                                'post_node_value': val_list2,
+                                'message': message}
+                            tresult['failed'].append(
+                                deepcopy(node_value_failed))
+
+                        else:
+                            count_pass = count_pass + 1
+                            message = self._print_message(
+                                info_mssg,
+                                iddict,
+                                predict,
+                                postdict,
+                                "debug")
+                            node_value_passed = {
+                                'id': id_val,
+                                'pre': predict,
+                                'post': postdict,
+                                'pre_node_value': val_list1,
+                                'post_node_value': val_list2,
+                                'message': message}
+                            tresult['passed'].append(
+                                deepcopy(node_value_passed))
+
+                    else:
+                        self.logger_testop.debug(colorama.Fore.RED +
+                                                 "ID gone missing!!!", extra=self.log_detail)
+                        # mapping id name to its value
+                        for length in range(len(k)):
+                            id_val[id_list[length]] = k[length][0].strip()
+                        if k in data1:
+                            self.logger_testop.error(
+                                "ID list '%s' is not present in post snapshot" %
+                                iddict, extra=self.log_detail)
+                            tresult['passed'].append(
+                                {'id_missing_post': deepcopy(id_val)})
+                        else:
+                            self.logger_testop.error(
+                                "ID list '%s' is not present in pre snapshot" %
+                                iddict, extra=self.log_detail)
+                            tresult['passed'].append(
+                                {'id_missing_pre': deepcopy(id_val)})
+                        # tresult['id_miss_match'].append(iddict.copy())
+                        self.logger_testop.debug(colorama.Fore.RED +
+                                                 jinja2.Template(
+                                                     err_mssg).render(
+                                                     iddict,
+                                                     pre=predict,
+                                                     post=postdict), extra=self.log_detail)
+                        res = True
+                        count_pass = count_pass + 1
+        if res is True:
+            msg = 'All "{0}" is not same in pre and post snapshot [ {1} matched / {2} failed ]'.format(
+                tresult['node_name'],
+                count_pass,
+                count_fail)
+            self._print_result(msg, res)
+        elif res is False:
+            msg = 'All "{0}" is same in pre and post snapshot [ {1} matched ]'.format(
+                tresult['node_name'],
+                count_pass)
+            self._print_result(msg, res)
+
+        #tresult['info'] = info_mssg
+        #tresult['err'] = err_mssg
+        tresult['result'] = res
+        tresult['count'] = {'pass': count_pass, 'fail': count_fail}
+        self.test_details[teston].append(tresult)
+
     def list_not_less(
             self, x_path, ele_list, err_mssg, info_mssg, teston, iter, id_list, test_name, xml1, xml2, ignore_null=None):
         self.print_testmssg("list-not-less")
