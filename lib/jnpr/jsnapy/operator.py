@@ -2533,16 +2533,17 @@ class Operator:
                         res = True
                         count_pass = count_pass + 1
         if res is True:
-            msg = 'All "{0}" is not same in pre and post snapshot [ {1} matched / {2} failed ]'.format(
-                tresult['node_name'],
-                count_pass,
-                count_fail)
-            self._print_result(msg, res)
-        elif res is False:
-            msg = 'All "{0}" is same in pre and post snapshot [ {1} matched ]'.format(
+            msg = 'All "{0}" is not same in pre and post snapshot [ {1} matched ]'.format(
                 tresult['node_name'],
                 count_pass)
             self._print_result(msg, res)
+        elif res is False:
+            msg = '"{0}" is same in pre and post snapshot [ {1} matched / {2} failed ]'.format(
+                tresult['node_name'],
+                count_fail,
+                count_pass)
+            self._print_result(msg, res)
+
 
         #tresult['info'] = info_mssg
         #tresult['err'] = err_mssg
