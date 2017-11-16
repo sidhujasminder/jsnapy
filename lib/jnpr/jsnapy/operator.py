@@ -2512,13 +2512,13 @@ class Operator:
                         for length in range(len(k)):
                             id_val[id_list[length]] = k[length][0].strip()
                         if k in data1:
-                            self.logger_testop.error(
+                            self.logger_testop.debug(
                                 "ID list '%s' is not present in post snapshot" %
                                 iddict, extra=self.log_detail)
                             tresult['passed'].append(
                                 {'id_missing_post': deepcopy(id_val)})
                         else:
-                            self.logger_testop.error(
+                            self.logger_testop.debug(
                                 "ID list '%s' is not present in pre snapshot" %
                                 iddict, extra=self.log_detail)
                             tresult['passed'].append(
