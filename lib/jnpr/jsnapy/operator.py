@@ -2530,7 +2530,7 @@ class Operator:
                                                      iddict,
                                                      pre=predict,
                                                      post=postdict), extra=self.log_detail)
-                        res = True
+                        # res = False
                         count_pass = count_pass + 1
         if res is True:
             msg = 'All "{0}" is not same in pre and post snapshot [ {1} matched ]'.format(
@@ -2540,8 +2540,8 @@ class Operator:
         elif res is False:
             msg = '"{0}" is same in pre and post snapshot [ {1} matched / {2} failed ]'.format(
                 tresult['node_name'],
-                count_fail,
-                count_pass)
+                count_pass,
+                count_fail)
             self._print_result(msg, res)
 
 
