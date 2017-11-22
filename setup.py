@@ -99,7 +99,7 @@ class OverrideInstall(install):
 
         HOME = expanduser("~")  # correct cross platform way to do it
         home_folder = os.path.join(HOME, '.jsnapy')
-        user_mode = 0o777
+        user_mode = 0o644
         if not os.path.isdir(home_folder):
             os.mkdir(home_folder)
             os.chmod(home_folder, user_mode)
