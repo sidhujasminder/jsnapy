@@ -15,12 +15,11 @@ if sys.version < '3':
 else:
     from configparser import ConfigParser
 
-import yaml
-from six import iteritems
-
 
 def set_logging_path(path):
     if os.path.exists(path):
+        import yaml
+        from six import iteritems
         with open(path, 'rt') as f:
             config = yaml.load(f.read())
 
@@ -41,8 +40,8 @@ def set_logging_path(path):
                                              (os.path.expanduser('~'),
                                               'jsnapy', 'logs', 'jsnapy.log'))
 
-                with open(path, "w") as f:
-                    yaml.dump(config, f, default_flow_style=False)
+                with open(path, "w") as dump_f:
+                    yaml.dump(config, dump_f, default_flow_style=False)
 
 
 class OverrideInstall(install):
@@ -53,10 +52,10 @@ class OverrideInstall(install):
             if '--install-data' in arg:
                 break
         else:
-            #--------------------------------
+            # --------------------------------
             # hasattr(sys,'real_prefix') checks whether the
             # user is working in python virtual environment
-            #--------------------------------
+            # --------------------------------
             if hasattr(sys, 'real_prefix'):
                 self.install_data = os.path.join(sys.prefix, 'etc',
                                                  'jsnapy')
@@ -72,15 +71,12 @@ class OverrideInstall(install):
         install.run(self)
 
         if 'win32' not in sys.platform and not hasattr(sys, 'real_prefix'):
+            dir_mode = 0o755
+            file_mode = 0o644
             os.chmod(dir_path, dir_mode)
             for root, dirs, files in os.walk(dir_path):
-                for directory in dirs:
-                    os.chmod(os.path.join(root, directory), dir_mode)
                 for fname in files:
                     os.chmod(os.path.join(root, fname), file_mode)
-
-            dir_mode = 0o775
-            file_mode = 0o664
 
             HOME = expanduser("~")  # correct cross platform way to do it
             home_folder = os.path.join(HOME, 'jsnapy')
@@ -97,16 +93,16 @@ class OverrideInstall(install):
                 for fname in files:
                     os.chmod(os.path.join(root, fname), file_mode)
 
-        HOME = expanduser("~")  # correct cross platform way to do it
-        home_folder = os.path.join(HOME, '.jsnapy')
-        user_mode = 0o644
-        if not os.path.isdir(home_folder):
-            os.mkdir(home_folder)
-            os.chmod(home_folder, user_mode)
+        # mode = 0o755
+        # HOME = expanduser("~")  # correct cross platform way to do it
+        # home_folder = os.path.join(HOME, '.jsnapy')
+        # if not os.path.isdir(home_folder):
+        #     os.mkdir(home_folder)
+        #     os.chmod(home_folder, mode)
 
         if dir_path != '/etc/jsnapy':
             config = ConfigParser()
-            config.set('DEFAULT','config_file_path',
+            config.set('DEFAULT', 'config_file_path',
                        dir_path)
             config.set('DEFAULT', 'snapshot_path',
                        os.path.join(dir_path, 'snapshots'))
@@ -152,28 +148,23 @@ class OverrideInstall(install):
 req_lines = [line.strip() for line in open(
     'requirements.txt').readlines()]
 install_reqs = list(filter(None, req_lines))
-example_files = [
-    os.path.join(
-        'samples',
-        i) for i in os.listdir('samples')]
 log_files = [os.path.join('logs', j)
              for j in os.listdir('logs')]
 exec(open('lib/jnpr/jsnapy/version.py').read())
 os_data_file = []
 
-#----------------------------
+# ----------------------------
 # In os_data_file variable,
 # the self.install_data path is taken as default prefix to
 # the new created directories and files.
 # Specifying the '.' means the directory directly specified
 # by self.install_data path.
 # Specifying only 'samples' means 'install_data Path'/samples
-#----------------------------
+# ----------------------------
 
 if hasattr(sys, 'real_prefix'):
     os_data_file = [('.', ['lib/jnpr/jsnapy/logging.yml']),
                     ('../../var/logs/jsnapy', log_files),
-                    ('samples', example_files),
                     ('.', ['lib/jnpr/jsnapy/jsnapy.cfg']),
                     ('testfiles', ['testfiles/README']),
                     ('snapshots', ['snapshots/README'])
@@ -182,7 +173,6 @@ if hasattr(sys, 'real_prefix'):
 elif 'win32' in sys.platform:
     os_data_file = [('.', ['lib/jnpr/jsnapy/logging.yml']),
                     ('../logs/jsnapy', log_files),
-                    ('samples', example_files),
                     ('.', ['lib/jnpr/jsnapy/jsnapy.cfg']),
                     ('testfiles', ['testfiles/README']),
                     ('snapshots', ['snapshots/README'])
@@ -192,11 +182,8 @@ else:
     HOME = expanduser("~")  # correct cross platform way to do it
     home_folder = os.path.join(HOME, 'jsnapy')
     os_data_file = [('/etc/jsnapy', ['lib/jnpr/jsnapy/logging.yml']),
-                    (os.path.join(home_folder,'samples'), example_files),
                     ('/etc/jsnapy', ['lib/jnpr/jsnapy/jsnapy.cfg']),
-                    (os.path.join(home_folder,'testfiles'), ['testfiles/README']),
-                    (os.path.join(home_folder,'snapshots'), ['snapshots/README']),
-                    (os.path.join(home_folder,'logs'), log_files)
+                    ('/var/log/jsnapy', log_files)
                     ]
 
 setup(name="jsnapy",
