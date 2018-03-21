@@ -108,7 +108,7 @@ class SnapAdmin:
         )
 
         self.parser.add_argument(
-            'test_files',
+            '--test_files',
             nargs='*',
             help="check for these files"
         )
@@ -1083,7 +1083,7 @@ class SnapAdmin:
         :return: print message in command line, regarding correct usage of JSNAPy
         """
         ## only four test operation is permitted, if given anything apart from this, then it should print error message
-        if (self.args.snap is False and self.args.snapcheck is False and self.args.check is False and self.args.diff is False and self.args.version is False):
+        if (self.args.snap is False and self.args.snapcheck is False and self.args.check is False and self.args.diff is False and self.args.version is False and self.args.syntax is False):
             self.logger.error(colorama.Fore.RED +
                               "Arguments not given correctly, Please refer help message", extra=self.log_detail)
             self.parser.print_help()
@@ -1114,12 +1114,14 @@ class SnapAdmin:
                     sys.exit(1)
 
     def check_syntax(self):
-        print "NOW WE WILL CHECK THE TESTFILE SYNTAX IF IT IS FINE"
-
         """
         Now here we need to handle the cases for the scenario,
          consider the case that user wrote *.yml check all the files(glog.glob can be used for it.)
          But looks like its already covered for the same.
+         How to use this Function:
+         jsnapy --syntax --test_files test_1.yml test_2.yml
+         jsnapy --syntax --test_files test_*.yml
+
 
         """
         print self.args.syntax
@@ -1147,6 +1149,7 @@ def main():
             print ("JSNAPy version: %s" % version.__version__)
         elif js.args.syntax is True:
             print "THIS IS FOR CHECKING THE FILES PLEASE MENTION THEM."
+            js.check_syntax()
         else:
             if js.args.verbosity:
                 js.set_verbosity(10*js.args.verbosity)
