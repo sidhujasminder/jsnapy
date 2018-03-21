@@ -101,6 +101,18 @@ class SnapAdmin:
             help="displays version"
         )
 
+        group.add_argument(
+            "--syntax",
+            action="store_true",
+            help="Check the Snytax for the testfiles"
+        )
+
+        self.parser.add_argument(
+            'test_files',
+            nargs='*',
+            help="check for these files"
+        )
+
         self.parser.add_argument(
             "pre_snapfile",
             nargs='?',
@@ -1101,6 +1113,28 @@ class SnapAdmin:
                     self.parser.print_help()
                     sys.exit(1)
 
+    def check_syntax(self):
+        print "NOW WE WILL CHECK THE TESTFILE SYNTAX IF IT IS FINE"
+
+        """
+        Now here we need to handle the cases for the scenario,
+         consider the case that user wrote *.yml check all the files(glog.glob can be used for it.)
+         But looks like its already covered for the same.
+
+        """
+        print self.args.syntax
+        print self.args.test_files
+        dir_path = os.path.dirname(os.path.abspath(__file__))
+        def_path = os.path.join(dir_path, 'check_testfile.yml')
+        import defconf
+        definition = yaml.load(open(def_path))
+        # print definition
+        for testfile in self.args.test_files:
+            config = yaml.load(open(testfile))
+            # print config
+            defconf.validate_config(config, definition, 'anything')
+
+        sys.exit(0)
 
 def main():
     js = SnapAdmin()
@@ -1111,6 +1145,8 @@ def main():
         js.check_arguments()
         if js.args.version is True:
             print ("JSNAPy version: %s" % version.__version__)
+        elif js.args.syntax is True:
+            print "THIS IS FOR CHECKING THE FILES PLEASE MENTION THEM."
         else:
             if js.args.verbosity:
                 js.set_verbosity(10*js.args.verbosity)

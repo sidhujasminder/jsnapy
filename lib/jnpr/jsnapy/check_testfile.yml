@@ -1,0 +1,17 @@
+validate:
+    main:
+        tests_include:       { type: list, mandatory: 0, function: all_tests_defined}
+        '*':                 { type: list, validate: inner, mandatory: 0 }
+
+    inner:
+        iterate:             { type: dict, validate: more_inner}
+        kwargs:              { type: dict }
+        rpc:                 { type: string }
+        command:             { type: string }
+        description:         { type: string }
+
+    more_inner:
+        xpath:               { type: string , mandatory: 1}
+        id:                  { type: string , mandatory: 1}
+        tests:               { type: list , function1: check_operator}
+
